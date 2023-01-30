@@ -1,0 +1,78 @@
+---
+title:  "MBDA730 - Assignment #3 - Preparing for Final Project"
+subtitle: "GitHub Repository + Website Generation"
+author: "Jehu Humphries"
+output: github_document
+---
+# LINKS:
+- GIT: JSH-ASGNMT#3-MBDA730 v1 @ HumphriesJehu/JSH-UC-BA (Public)
+- WEB: https://lambent-yeot-04501b.netlify.app
+
+# PACKAGES
+- Library for Tweet/User Data Analysis
+```{r}
+library(corpus)
+library(lubridate)
+library(rsconnect)
+library(tidytext)
+library(tidyverse)
+```
+# LINKS:
+- GIT: JSH-ASGNMT#3-MBDA730 @ HumphriesJehu/JSH-UC-BA (Public)
+- WEB: https://lambent-yeot-04501b.netlify.app
+
+# MBDA730 - WK3: Analytical Homework: Final Project Preparation:
+- This week, you will start thinking about Final Project. Description about 
+- Final Project is on the main menu in our course website. Answer the following
+- questions to start thinking about the Final Project.
+- 1) What are three projects you are interested in from NY Times Data Privacy Project?
+- 2) Given your selections, provide data sources for each project, being as specific as possible.
+- 3) Data Privacy Lab Projects: Can you identify three projects that deal with the data privacy issues you selected?
+- 4) Type your responses and save it on Rmarkdown and push the RMD file in your github repository completed in last week.
+
+# REQUIREMENTS #1 and #2:
+
+# A) All This Dystopia, and for What?
+- When privacy-eroding technology doesn’t deliver on its promises.
+- SOURCE: Axaxl. (2018). Data dystopia: what does the future hold for data privacy? Axaxl.com. 
+- Retrieved January 27, 2023 from https://axaxl.com/fast-fast-forward/articles/data-dystopia-what-does-the-future-hold-for-data-privacy
+
+# B) The Government Uses ‘Near Perfect Surveillance’ Data on Americans
+- Congressional hearings are urgently needed to address location tracking.
+- SOURCE: Auxier, B. (2019). Key takeaways on Americans’ views about privacy, surveillance and data-sharing. PewResearchCenter.
+- Retrieved January 27, 2023 from https://www.pewresearch.org/fact-tank/2019/11/
+- 15/key-takeaways-on-americans-views-about-privacy-surveillance-and-data-sharing/
+
+# C) How the ‘Sharing’ Economy Erodes Both Privacy and Trust
+- To participate in services like Airbnb, you have to expose yourself.
+- SOURCE: Raval, T. (2020). The Sharing Economy Needs Robust Verification For Trust And Safety. Forbes.
+- Retrieved January 27, 2023 from https://www.forbes.com/sites/forbestechcouncil/
+- 2020/01/24/the-sharing-economy-needs-robust-verification-for-trust-and-safety/?sh=3b2329b163f3
+
+# REQUIREMENT #3:
+
+# A) Proposed Changes to the Common Rule
+# B) AI Technologies to Defeat Identity Theft Vulnerabilities
+# C) The Privacy-Preserving Surveillance Project
+# D) 1.	Sorrell (Vermont) v. IMS Health Inc.
+
+# REQUIREMENT #4:
+- RMD developed. File pushed to Git and to website.
+- GIT: JSH-ASGNMT#3-MBDA730 @ HumphriesJehu/JSH-UC-BA (Public)
+- WEB: https://lambent-yeot-04501b.netlify.app
+
+# ASGNMT#2: GOALS Accomplished:
+- Git installed. GitHub integrated with RStudio.
+- GitHub Repository can be found at: 
+- HumphriesJehu/JSH-UC-BA (Public)
+
+- Website with index.HTML deployed through Netlify.
+- Website with Project HTML can be found at: 
+- https://incomparable-sfogliatella-8b1745.netlify.app
+- Additional resource: rpubs webfiling @ https://rpubs.com/JeSalHump/994289
+
+- //END
+
+
+
+
