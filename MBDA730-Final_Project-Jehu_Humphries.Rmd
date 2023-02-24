@@ -1,0 +1,146 @@
+---
+title:  "MBDA730 - Assimilating the New York Times Privacy Project with the Data Privacy Lab - Author: Jehu Humphries "
+output: 
+  flexdashboard::flex_dashboard:
+    theme:
+      version: 4
+      bg: "#101010"
+      fg: "#FDF7F7" 
+      primary: "#00757C"
+      navbar-bg: "#3ADAC6"
+      base_font: 
+        google: Prompt
+      heading_font:
+        google: Sen
+      code_font:
+        google: 
+          family: JetBrains Mono
+          local: false
+---
+
+Column
+--------------------------------------------------------------------------------
+
+```{r, echo=FALSE}
+library(papaja)
+library(remotes)
+library(rmarkdown)
+library(rsconnect)
+library(shiny)
+library(tidytext)
+library(tidyverse)
+```
+
+### 1. ALL THIS DYSTOPIA
+
+- **[NYT Privacy Project: All this dystopia, and for what. When privacy-eroding technology doesn’t deliver on its promises (NYTPP):](https://www.nytimes.com/2020/02/18/opinion/facial-recognition-surveillance-privacy.html)**
+The subject of AI applications utilizing facial recognition as a means to identify people, especially in the use of apprehending potential criminals, continues to be a subject with many people seeing it as advantageous, and others viewing as a danger to society. The article highlighted two controversial subjects in the text: whether facial recognition technology invades people’s privacy, and whether it is able to accurately identify people fairly (Warzel, 2020). Although the subject of whether facial recognition in AI technology invades people’s privacy is still a hot issue, the article focused on whether the technology was able to identify people fairly. 
+   
+   The associated study highlighted in the article, conducted by (Buolamwini & Gebru, 2018), provided analytical proof that darker women were much more likely to be misidentified by current, as of 2020, facial recognition systems than other demographic groups. Between the Microsoft, Face++ and the IBM software compared, they found a bias disparity of 30% misidentification of darker skin women compared to other demographic groups (Buolamwini & Gebru, 2018). The facial recognition software examined was shown to have bias issues with certain demographic groups.
+
+- **[Sources of Harm:](https://arxiv.org/abs/1901.10002)** 
+When this article was written, facial recognition technologies were still being developed for employment in government and private surveillance systems, and many bias flaws were identified during the trial processes of these systems. Moving forward five years later, much effort has been taken to rectify the biases problem in these systems. The problems that plagued the facial recognition software of the past was both technical and informational. 
+
+   Lack of robust fairness in data selection for algorithmic training sets, and also the technology of the cameras used in the past were not as accurate as they are now (Baker, 2022). Using unequal amounts of diverse samples in an algorithmic model is a Data-Driven source of potential bias. By applying a biased model in a diverse population application, the problem is also Interpretation-Driven (Suresh & Guttag, 2019). 
+
+- **Now What:**
+Like any new technology, facial recognition technology has taken time and effort to get right. Whether the use of AI to surveil people is an invasion of people’s privacy is an ethical issue likely never to be definitively solved, but the application needs to have boundaries applied to negate the misidentification of innocent people. The technological issues with facial recognition have been greatly improved, but it may never be enough to solve all bias issues people are concerned with.
+
+- **[AI Recommendation System:](https://www.smarthint.co/sistema-de-recomendacao-inteligencia-artificial/)**
+The use of AI to perform recognition applications can be a useful tool to stem the proliferation of criminal and terrorist behavior. Melding AI recommendation system architecture (D'Arc, 2021), such as used by Amazon and Netflix, into a facial recognition system could potentially add selectivity and automatic updates to authorized users of potential suspects or perpetrators of crimes. Conceptually, authorized official users of the system would receive updates to their secured terminals or mobile devices continuously, even while the users are sleeping. This type of automation could potentially add efficiency to how crimes are solved, and potentially speed up the process.
+
+- **[Data Privacy Lab: Face De-Identification:](https://dataprivacylab.org/projects/facedeid/paper.pdf)**
+ While the use of machine learning systems to perform recognition applications can be a useful tool to stem the proliferation of criminal and terroristic behavior, these applications also pose potential personal identification challenges and threats for the general public. To alleviate some of the potential challenges and threats to loss of personal privacy, algorithmic methods have been developed to obscure the faces of the innocent. Common methods such as ‘Ad-hoc’ and ‘Naïve’ distortion and suppression employ blurring or pixilation of photos to distort the image enough to provide recognition anonymity of personal data (Gross et al., 2020). These methods, along with the ‘k-same’ framework method have had limited success in protecting personal privacy especially with multiple pictures of the same person in the same database. 
+ 
+  The ‘Face De-identification’ project formed under the Data Privacy Lab was an effort to improve the methods of providing personal data security by introducing multi-factor de-identification of digital face data. The goal of this project was to introduce the factorization of key components needed for face identification, and maintain these components in the digital photo, while also distorting the image enough to protect personal privacy (Gross et al., 2020). Methods such as multi-factor de-identification can be employed to potentially negate or fix some of the older privacy concerns with misidentification of people while also providing anonymity against improper use of private data. 
+
+- **References:** |
+[(Baker, 2022)](https://www.lawfareblog.com/flawed-claims-about-bias-facial-recognition) |
+[(Buolamwini & Gebru, 2018)](http://proceedings.mlr.press/v81/buolamwini18a/buolamwini18a.pdf) |
+[(D'Arc, 2021)](https://www.smarthint.co/sistema-de-recomendacao-inteligencia-artificial/) |
+[(Gross et al., 2020)](https://dataprivacylab.org/projects/facedeid/paper.pdf) |
+[(Suresh & Guttag, 2019)](https://arxiv.org/abs/1901.10002) |
+[(Warzel, 2020)](https://www.nytimes.com/2020/02/18/opinion/facial-recognition-surveillance-privacy.html) |
+
+- **Disclaimer:** Both the New York Times Privacy Project and the Data Privacy Lab projects were concluded in approximately circa 2020. While the concepts covered in the research above are still applicable, many AI and ML privacy advances have been made since then to rectify some of the issues originally encountered with AI systems.
+
+Column {.tabset}
+--------------------------------------------------------------------------------
+
+### 2. GOVERNMENT ‘NEAR PERFECT SURVEILLANCE'
+
+- **[NYT Privacy Project: The Government uses 'Near Perfect Surveillance' Data on Americans. Congressional hearings are urgently needed to address location tracking (NYTPP):](https://www.nytimes.com/2020/02/07/opinion/dhs-cell-phone-tracking.html)** 
+On June 22, 2018 the Supreme Court of the United States ruled to not allow the U.S. Government the ability to acquire cell-site location information (CSLI) from wireless cell-phone carriers without the use of a warrant. Wireless cell-phone companies are commercial entities which do not have the requirement to relinquish proprietary data, which is considered personal private data protected under the Fourth Amendment and requires a warrant based on probable cause to be seized by law enforcement officials (Supreme Court, 2018).
+
+   While this form of data seizure has a Supreme Court ruling to protect data seizure of this type, this does not prevent the Government from procuring personal location data in other ways. Many smart phone apps provide personal location data to these companies to use for developing pattern of life user profiles to enable marketing campaigns to be targeted directly at individuals who’s driving and purchasing patterns reveal them as likely consumers of their products and services (Editorial Board, 2020). This same data can also be potentially purchased by Government agencies to enable surveillance of potential or suspect criminals. 
+
+- **[Sources of Harm:](https://arxiv.org/abs/1901.10002)** 
+Most Americans would likely subscribe to Governmental programs which lower the potential they themselves could be targeted by a potential criminal or terrorist act, but if data can be purchased for this purpose, what is stopping nefarious entities from procuring the data to maliciously target individuals. The potential sources of harm in a Machine Learning or AI system designed to surveil or develop patterns of life for people can be both Data and Interpretation driven. 
+
+   Historical, representation and measurement bias in data collection and analysis of people patterns could lead to faulty outputs or incorrect identification of potential perpetrators (Suresh & Guttag, 2019). Aggregation and evaluation bias could also affect faulty outputs or incorrect identification of potential people of interest. 
+
+- **Now What:**
+Americans, and most likely many people living in any developed societies, are concerned about what type and the amount of information that is collected about them. Approximately 79% of Americans are concerned about what companies are collecting about them, and about 64% are concerned about what the government collects about them (Auxier, 2019). Many are also concerned about what is being tracked about them through phone apps. 
+
+   Approximately 72% are concerned about what companies are tracking about them, and 47% are concerned about what the government is tracking about them through their phones. While most people would like for the government to prevent them from being targeted by criminals or terrorists, approximately 81% feel the risk outweighs the reward (Auxier, 2019).
+
+- **[AI Recommendation System:](https://www.smarthint.co/sistema-de-recomendacao-inteligencia-artificial/)**
+The use of AI to perform location applications can be a useful tool to stem the proliferation of criminal and terrorist behavior. Melding AI recommendation system architecture (D'Arc, 2021), such as used by Amazon and Netflix, into a location data system could potentially add selectivity and automatic updates to authorized users of potential suspects or perpetrators of crimes. Facial recognition, location data, and AI recommendation system architectures could be potentially tied together to provide authorized users of the system would updates to their secured terminals or mobile devices continuously, even while the users are sleeping. This type of automation could potentially add efficiency to how crimes are solved, and potentially speed up the process.
+
+- **[Data Privacy Lab: DataFly:](https://dataprivacylab.org/datafly/index.html)**
+Personal data privacy has been a highly controversial subject since people began to understand what information is being collected about them through the smart algorithm devices they use. Some people are agnostic to potential breaches of privacy until their identity is stolen and someone buys a new house with their personal data. The medical field and practice is also a very controversial arena where AI medical care systematization initiatives to improve patient survivability while also reducing administrative complications to better patient care, have created a challenge of how to manage personal data at the appropriately authorized level. 
+
+  If levels of protection or access are not provided to protect personal data, then those few in the medical field who wish to supplement their own gains by using other people’s information to steal prosperity will have the access to do so.  ‘DataFly’ is a Data Privacy Project designed to rectify this issue, and while the application was designed for the medical field, the concept can be applied across any industry where the levels of data access authorization will determine the resolution of the data people have access to. The concept behind DataFly, is to allow an authorized individual to customize a dataset to the need or authorization level of other users. 
+
+  The system is designed to pull together several proprietary data sources within a hospital network system and compile datasets with removed or changed sensitive variables depending on the level authorized requester of the information.  The concept of DataFly is to control the flow of data sensitivity within larger medical systems but could just as likely be adapted to supplement other AI systems such as mentioned in the New York Times Privacy Project about ‘Near Perfect Surveillance’ of the American people. 
+
+- **References:** |
+[(Auxier, 2019)](https://www.pewresearch.org/fact-tank/2019/11/15/key-takeaways-on-americans-views-about-privacy-surveillance-and-data-sharing/) | 
+[(D'Arc, 2021)](https://www.smarthint.co/sistema-de-recomendacao-inteligencia-artificial/) |
+[(Editorial Board, 2020)](https://www.nytimes.com/2020/02/07/opinion/dhs-cell-phone-tracking.html) | 
+[(Supreme Court, 2018)](https://www.supremecourt.gov/opinions/17pdf/16-402_h315.pdf) | 
+[(Suresh & Guttag, 2019)](https://arxiv.org/abs/1901.10002) |
+[(Sweeney, 1997)](https://dataprivacylab.org/datafly/index.html) |
+
+- **Disclaimer:** Both the New York Times Privacy Project and the Data Privacy Lab projects were concluded in approximately circa 2020. While the concepts covered in the research above are still applicable, many AI and ML privacy advances have been made since then to rectify some of the issues originally encountered with AI systems.
+
+Column {.tabset}
+--------------------------------------------------------------------------------
+### 3. THE 'SHARING' ECONOMY ERODES PRIVACY AND TRUST 
+
+- **[NYT Privacy Project: How the 'Sharing' economy erodes both privacy and trust. To Participate In Services Like Airbnb, You Have To Expose Yourself (NYTPP):](https://www.nytimes.com/2020/01/18/opinion/sunday/privacy-trust.html)** 
+Trust with how data is collected from people and how it is used by both companies and the government is not easily given. The relationship of what people consider privacy is directly related to how much trust is given to provide or reveal private information. In the ‘sharing’ economy, trust goes both ways; people must be willing to provide personal information in order to be trusted with products or services companies provide (Scott, 2020). The other option is to not use some of the services and applications people find most useful in their lives instead of potentially exposing a person's personal information.
+   
+   In regards to services such as Airbnb owners of homes are not likely to provide access to their homes if proper insurance is not provided that the temporary residents of their homes will take care of them. Whether people frequent the use of the Airbnb service, Uber, or any other type of service which tracks the movement of people performing a service, the idea of trust is somewhat replaced with the concept of surveillance (Scott, 2020). The concept of trust is no longer the commodity of exchange in order to have perfect strangers perform services or to stay in a home of someone you've never met.
+
+- **[Sources of Harm:](https://arxiv.org/abs/1901.10002)** 
+Many people want to partake in Machine Learning or Artificial Intelligence based applications that enable their lives to be more enjoyable or less hectic, but there is a cost of privacy loss associated with partaking in this technology. The trust factor of whether someone is reliable enough to perform the service they say they will perform, or whether a customer will not damage a temporary residents the lodge in is no longer a matter of trust, but a matter of surveillance (Scott, 2020). 
+
+   The potential sources of harm in a Machine Learning or AI system designed to provide a service based on  patterns of life for people can be both Data and Interpretation driven. Historical, representation and measurement bias in data collection and analysis of people patterns could lead to faulty outputs or incorrect identification of trust in individuals or services (Suresh & Guttag, 2019). Aggregation and evaluation bias could also affect faulty outputs.
+
+- **Now What:**
+The use of ML and AI applications to provide accommodations and services to people is typically a desirable commodity due to the cost-efficiency and conveniences they provide (Raval, 2020). In order for the ‘sharing’ economy to thrive, there must be a balance between trust and transparency between the user and the provider, and there must be controls by companies in this type of economic model to ensure people’s privacy is not violated or maliciously taken advantage of (Raval, 2020). 
+
+- **[AI Recommendation System:](https://www.smarthint.co/sistema-de-recomendacao-inteligencia-artificial/)**
+The use of ML and AI architecture in applications such as owned by the Airbnb and Uber companies, use AI Recommendation System components to enable customers to select rides or places to stay based on selection criteria that meet there needs and wants. While the AI Recommendations Systems such as Amazon on Netflix may be use more selection heavy algorithms than the ones used by Airbnb and Uber, there all use similar types of systems. 
+
+- **[Data Privacy Lab: DataFly:](https://dataprivacylab.org/datafly/index.html)**
+Personal data privacy has been a highly controversial subject since people began to understand what information is being collected about them through the smart algorithm devices they use. Some people are agnostic to potential breaches of privacy until their identity is stolen and someone buys a new house with their personal data. The medical field and practice is also a very controversial arena where AI medical care systematization initiatives to improve patient survivability while also reducing administrative complications to better patient care, have created a challenge of how to manage personal data at the appropriately authorized level. 
+
+  If levels of protection or access are not provided to protect personal data, then those few in the medical field who wish to supplement their own gains by using other people’s information to steal prosperity will have the access to do so.  ‘DataFly’ is a Data Privacy Project designed to rectify this issue, and while the application was designed for the medical field, the concept can be applied across any industry where the levels of data access authorization will determine the resolution of the data people have access to. The concept behind DataFly, is to allow an authorized individual to customize a dataset to the need or authorization level of other users. 
+
+  The system is designed to pull together several proprietary data sources within a hospital network system and compile datasets with removed or changed sensitive variables depending on the level authorized requester of the information.  The concept of DataFly is to control the flow of data sensitivity within larger medical systems but the concept could just as likely be adapted to supplement other AI systems such as mentioned in the New York Times Privacy Project about how the ‘Sharing' Economy Erodes Both Privacy and Trust. 
+
+- **References:** |
+[(D'Arc, 2021)](https://www.smarthint.co/sistema-de-recomendacao-inteligencia-artificial/) |
+[(Raval, 2020)](https://www.forbes.com/sites/forbestechcouncil/2020/01/24/the-sharing-economy-needs-robust-verification-for-trust-and-safety/?sh=74fbce2763f3) |
+[(Scott, 2020)](https://www.nytimes.com/2020/01/18/opinion/sunday/privacy-trust.html) |
+[(Suresh & Guttag, 2019)](https://arxiv.org/abs/1901.10002) |
+[(Sweeney, 1997)](https://dataprivacylab.org/datafly/index.html) |
+
+- **Disclaimer:** Both the New York Times Privacy Project and the Data Privacy Lab projects were concluded in approximately circa 2020. While the concepts covered in the research above are still applicable, many AI and ML privacy advances have been made since then to rectify some of the issues originally encountered with AI systems.
+
+
+
+
+
