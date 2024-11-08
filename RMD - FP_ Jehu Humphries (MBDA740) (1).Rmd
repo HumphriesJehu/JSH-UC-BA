@@ -1,0 +1,459 @@
+---
+author: Jehu Humphries
+class:  MBDA-740-02N, Data Science & Tech
+title:  MBDA740 - Final Project (Posit R Notebook)
+output: html_notebook
+professor: Jiyoon Park, UCWV   
+goal:   "Post-COVID statistics show an increase of Heart Attack and Stroke Mortality." 
+goal2:  "The following code analyzes Twitter Tweets for societal opinion on the cause of the increased deaths after COVID." 
+---
+# Library for Tweet/User Data Analysis
+```{r}
+library(corpus)
+library(lubridate)
+library(rtweet)
+library(SnowballC)
+library(tidytext)
+library(tidyverse)
+library(tm)
+library(visdat)
+library(wordcloud)
+```
+# Strip Warnings from Outputs
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
+
+################# CODE LINES 16-72 REDACTED FOR USER  ##########################
+################# USER CODE STARTS AT LINE 90 BELOW   ##########################
+# Set Authorizations
+```{r}
+# appname <- "???"
+# key <- "???" 
+# secret <- "???"
+# access_token <- "???"
+# access_secret <- "???"
+```
+# Open rTweet channel to Twitter
+```{r}
+# my_auth <- rtweet::create_token(
+#   app = appname,
+#   consumer_key = key,
+#   consumer_secret = secret,
+#   access_token = access_token,
+#   access_secret = access_secret)
+```
+# Coerce Authentication
+```{r}
+# my_auth <- rtweet::create_token()
+```
+
+# Search RTweets for "excess_deaths" data: 5000 observations / 43 variables
+# Pull Users of "excess_deaths" data
+```{r}
+# ExcessD_tweets <- search_tweets(q = "excess_deaths",
+#                               n = 5000, include_rts = FALSE)
+# ExcessD_tweets1 <- users_data(ExcessD_tweets)
+```
+# Create ExDT DataFrame to combine Tweets and Users data with Selected Columns Only
+```{r}
+# ExDTA <- ExcessD_tweets[, c(1,4,6,9,14,20,21,25)]
+# ExDTB <- ExcessD_tweets1[, c(3,4,5,6,9,10,11,12,13,15)]
+# ExDT <- cbind.data.frame(ExDTA, ExDTB)
+```
+
+# Change Column Names of DataFrame
+```{r}
+# colnames(ExDT)[1] = "Date"
+# colnames(ExDT)[2] = "FText"
+# colnames(ExDT)[3] = "Range"
+# colnames(ExDT)[4] = "Source"
+# colnames(ExDT)[5] = "IRName"
+# colnames(ExDT)[6] = "RTSCount"
+# colnames(ExDT)[7] = "FAVCount"
+# colnames(ExDT)[8] = "LANG"
+# colnames(ExDT)[9] = "Name"
+# colnames(ExDT)[10] = "ScreenN"
+# colnames(ExDT)[11] = "LOC"
+# colnames(ExDT)[12] = "Descrip"
+# colnames(ExDT)[13] = "FollowC"
+# colnames(ExDT)[14] = "FriendC"
+# colnames(ExDT)[15] = "ListC"
+# colnames(ExDT)[16] = "CreatedD"
+# colnames(ExDT)[17] = "FavC"
+# colnames(ExDT)[18] = "StatusC"
+```
+
+```{r}
+# write_csv(ExDT, "ExDT10.csv")
+```
+
+# Create DataFrame from .CSV (4996 obs. of  18 variables): Atomic Vectors changed to Class=FACTOR
+```{r}
+ExDT1 <- read.csv("ExDT10.csv", stringsAsFactors = TRUE)
+```
+# Verify class as data.frame
+```{r}
+ExDT1 <- as.data.frame(ExDT1)
+class(ExDT1)
+```
+# View Variable Classes
+```{r}
+str(ExDT1)
+```
+# Change Interger class to Numeric. Change Factor class to Character.
+```{r}
+ExDT1$Date <- as.Date(ExDT1$Date)
+ExDT1$FText <- as.character(ExDT1$FText)
+ExDT1$Range <- as.numeric(ExDT1$Range)
+ExDT1$Source <- as.character(ExDT1$Source)
+ExDT1$IRName <- as.character(ExDT1$IRName)
+ExDT1$RTSCount <- as.numeric(ExDT1$RTSCount)
+ExDT1$FAVCount <- as.numeric(ExDT1$FAVCount)
+ExDT1$LANG <- as.character(ExDT1$LANG)
+ExDT1$Name <- as.character(ExDT1$Name)
+ExDT1$ScreenN <- as.character(ExDT1$ScreenN)
+ExDT1$LOC <- as.character(ExDT1$LOC)
+ExDT1$Descrip <- as.character(ExDT1$Descrip)
+ExDT1$FollowC <- as.numeric(ExDT1$FollowC)
+ExDT1$FriendC <- as.numeric(ExDT1$FriendC)
+ExDT1$ListC <- as.numeric(ExDT1$ListC)
+ExDT1$CreatedD <- as.character(ExDT1$CreatedD)
+ExDT1$FavC <- as.numeric(ExDT1$FavC)
+ExDT1$StatusC <- as.numeric(ExDT1$StatusC)
+```
+# Change Date Variable for (NOV22) to Day Only and Change Class to Numeric
+```{r}
+ExDT1$Date <- format(as.Date(ExDT1$Date, format="%Y/%m/%d"),"%d")
+ExDT1$Date <- as.numeric(ExDT1$Date)
+```
+
+# View Variable Class changes
+```{r}
+str(ExDT1)
+```
+# Observe Statistical Min/Mean/Max of Numeric Variables
+```{r}
+summary(ExDT1)
+```
+# Observe Head Data
+```{r}
+head(ExDT1)
+```
+# Observe Tail Data
+```{r}
+tail(ExDT1)
+```
+# ExDT1 Data is Categorized between Character and Numeric Classes. IRName has 'NAs'
+```{r}
+vis_dat(ExDT1, warn_large_data = FALSE)
+```
+# All Data in ExDT1 == IRName has 'NAs'
+```{r}
+vis_miss(ExDT1, warn_large_data = FALSE)
+```
+
+# Twitter Tweet Text: Clean Full Text == 'FText' Variable in ExDT1 using Corpus/TM MAP()
+```{r}
+text_corpus <- Corpus(VectorSource(ExDT1$FText))
+text_corpus <- tm_map(text_corpus, tolower)
+text_corpus <- tm_map(text_corpus, removeWords, stopwords("english"))
+text_corpus <- tm_map(text_corpus, removePunctuation)
+text_corpus <- tm_map(text_corpus, removeWords, c("since", "for", "this",
+                                                  "like", "that", "our",
+                                                  "will", "s", "ve", "'", "amp",
+                                                  "just", "will", "can", "one", 
+                                                  "since", "like", "look", "also",
+                                                  "draseemmalhotra", "per", "it's", "united"))
+text_df <- data.frame(text_clean = get("content", text_corpus), stringsAsFactors = FALSE)
+```
+
+# Clean 'Source' Variable in ExDT1 using Gsub()
+```{r}
+ExDT1$Source <- gsub("\\$", "", ExDT1$Source) 
+ExDT1$Source <- gsub("@\\w+", "", ExDT1$Source)
+ExDT1$Source <- gsub("[[:punct:]]","", ExDT1$Source)
+ExDT1$Source <- gsub("http\\w+", "", ExDT1$Source)
+ExDT1$Source <- gsub("[ |\t]{2,}", "", ExDT1$Source)
+ExDT1$Source <- gsub("^ ", "", ExDT1$Source)
+ExDT1$Source <- gsub(" $", "", ExDT1$Source)
+ExDT1$Source <- gsub("RT","", ExDT1$Source)
+ExDT1$Source <- gsub("href", "", ExDT1$Source)
+ExDT1$Source <- gsub("([0-9])","", ExDT1$Source)
+ExDT1$Source <- gsub("a","", ExDT1$Source)
+ExDT1$Source <- gsub("relnofollowTwitter","", ExDT1$Source)
+ExDT1$Source <- gsub("for","", ExDT1$Source)
+ExDT1$Source <- gsub("App","", ExDT1$Source)
+ExDT1$Source <- gsub(" ","", ExDT1$Source)
+ExDT1$Source <- gsub("relnofollowTweetDeck","Web", ExDT1$Source)
+ExDT1$Source <- gsub("Mc","Other", ExDT1$Source)
+ExDT1$Source <- gsub("MediStudio","Other", ExDT1$Source)
+ExDT1$Source <- gsub("relnofollowBuffer","Other", ExDT1$Source)
+ExDT1$Source <- gsub("relnofollowContentStudioio","Other", ExDT1$Source)
+ExDT1$Source <- gsub("relnofollowdlvrit","Other", ExDT1$Source)
+ExDT1$Source <- gsub("relnofollowEchobox","Other", ExDT1$Source)
+ExDT1$Source <- gsub("relnofollowFenix","Other", ExDT1$Source)
+ExDT1$Source <- gsub("relnofollowFenixiOS","Other", ExDT1$Source)
+ExDT1$Source <- gsub("relnofollowHootsuiteInc","Other", ExDT1$Source)
+ExDT1$Source <- gsub("relnofollowIFTTT","Other", ExDT1$Source)
+ExDT1$Source <- gsub("relnofollowlnkdtppstging","Other", ExDT1$Source)
+ExDT1$Source <- gsub("relnofollowModernGhn","Other", ExDT1$Source)
+ExDT1$Source <- gsub("relnofollowPeriscope","Other", ExDT1$Source)
+ExDT1$Source <- gsub("relnofollowRSSGround","Other", ExDT1$Source)
+ExDT1$Source <- gsub("relnofollowSproutSocil","Other", ExDT1$Source)
+ExDT1$Source <- gsub("relnofollowTheTweetedTimes","Other", ExDT1$Source)
+ExDT1$Source <- gsub("relnofollowTweetbotiUFS","Other", ExDT1$Source)
+ExDT1$Source <- gsub("relnofollowTweetbotMc","Other", ExDT1$Source)
+ExDT1$Source <- gsub("relnofollowWhosoeverWill","Other", ExDT1$Source)
+ExDT1$Source <- gsub("relnofollowWordPresscom","Other", ExDT1$Source)
+ExDT1$Source <- gsub("relnofollowZpiercom","Other", ExDT1$Source)
+ExDT1$Source <- gsub("rificiOS","Other", ExDT1$Source)
+ExDT1$Source <- gsub("rificMc","Other", ExDT1$Source)
+ExDT1$Source <- gsub("OtheriOS","Other", ExDT1$Source)
+ExDT1$Source <- gsub("relnofollowLinkedIn","Other", ExDT1$Source)
+ExDT1$Source <- gsub("relnofollowTweetbotOther","Other", ExDT1$Source)
+ExDT1$Source <- gsub("rificOther","Other", ExDT1$Source)
+ExDT1$Source <- gsub("iPd","IPad", ExDT1$Source)
+ExDT1$Source <- gsub("iPhone","IPhone", ExDT1$Source)
+```
+
+
+# Twitter Location: Clean Full Text == 'LOC' Variable in ExDT1 using Corpus/TM MAP()
+```{r}
+text_corpus1 <- Corpus(VectorSource(ExDT1$LOC))
+text_corpus1 <- tm_map(text_corpus1, tolower)
+text_corpus1 <- tm_map(text_corpus1, removeWords, stopwords("english"))
+text_corpus1 <- tm_map(text_corpus1, removePunctuation)
+text_corpus1 <- tm_map(text_corpus1, stripWhitespace)
+text_corpus1 <- tm_map(text_corpus1, removeWords, c("new", "county", "orange",
+                                                  "city", "free", "state",
+                                                  "cruz", "san", "head", "rent",
+                                                  "stalkers", "wirral", "leeds"))
+text_df1 <- data.frame(text_clean1 = get("content", text_corpus1), stringsAsFactors = FALSE)
+```
+# Bind Textual columns to DataFrame. Rename Columns. Delete uneeded columns.
+# Sort columns for Final DataSet and write as .csv
+```{r}
+ExDT1 <- cbind(ExDT1, text_df, text_df1)
+colnames(ExDT1)[19] = "FText1"
+colnames(ExDT1)[20] = "LOC1"
+ExDTvFIN <- ExDT1[,-c(2, 5, 8, 9, 10, 11, 16, 21, 22)]
+ExDtvFIN1 <- ExDTvFIN[,c(1, 13, 12, 3, 2, 4, 5, 7, 8, 10, 11, 9, 6)]
+write.csv(ExDtvFIN1, "ExDT_Final_Dataset.csv")
+```
+
+################################################################################
+####################### EXPLORATORY/DESCRIPTIVE ANALYSIS #######################
+
+# OBSERVATION(1): Date Data is Concentrated between 12th to 15th of NOV22 TimeFrame
+```{r}
+hist(ExDT1$Date, main = "Dates of Tweet Data in November 2022 (Post COVID)", 
+     xlab = "Distribution shows primary range between 12th through 15th",
+     border = "black")
+```
+# OBSERVATION(2): Scatter plot shows Tweet size concentration <400 characters
+```{r}
+scatter.smooth(ExDT1$Range, main = "Tweet Size Range for Downloaded Tweet Data", 
+     xlab = "Scatter Plot: Tweet size concentration <400 Characters")
+```
+# OBSERVATION(3): Bar Plot - Shows WEB Applications Exceed IPhone or Android Usage. 
+# OBSERVATION(4): IPhone leads Android usage, but phone usage exceeds WEB Applications. 
+```{r}
+ExDT2 <- ExDT1                                                 
+ExDT2$Source <- factor(ExDT2$Source, 
+                       levels = c("Web", "IPhone", "Android", "IPad", "Other"))
+ggplot(ExDT2) +
+    geom_bar(aes(x = Source)) +
+  theme(panel.grid.major  = element_line(color = "blue"), 
+        panel.background = element_rect(fill = "lightblue"), 
+        panel.border = element_rect(color = "lightblue", fill = NA), 
+        axis.line = element_line(color = "lightblue"), 
+        axis.ticks = element_line(color = "lightblue"), 
+        axis.text = element_text(color = "black"))
+```
+
+############################### WORD/Text CLOUDS ANALYSIS ###################### 
+
+# OBSERVATION(5): Table: TOP 50 Twitter "Excess Deaths" Associated Words used in Tweets
+# OBSERVATION(6): Tweets - TOP 50 Show strong opinion correlation to COVID Vaccine Usage
+```{r}
+FTWord <- (text_df$text_clean)
+FTWord <- VectorSource(FTWord)
+FTWord <- Corpus(FTWord)
+FTWordT <- TermDocumentMatrix(FTWord)
+FTWordM <- as.matrix(FTWordT)
+FTWordV <- sort(rowSums(FTWordM),decreasing=TRUE)
+FTWordD <- data.frame(word = names(FTWordV),freq = FTWordV)
+head(FTWordD, 50)
+```
+# OBSERVATION(7): BarPlot - TOP 15 Twitter "Excess Deaths" Word Counts
+# OBSERVATION(8): Tweets - TOP 15 Show strong opinion correlation to COVID Vaccine Usage
+```{r}
+barplot(FTWordV [1:15], main = "Tweets: Excess Deaths - Top 15 Associated Words",
+        col = "orange", horiz = TRUE, las = 1)
+```
+
+# OBSERVATION(9): Tweets "Excess Deaths" Word/Text Cloud shows strong opinion correlation to COVID Vaccines
+```{r}
+wordcloud(words = FTWordD$word, freq = FTWordD$freq, min.freq = 1,
+          max.words=175,random.order=FALSE, rot.per=0.35,
+          colors=brewer.pal(8, "Dark2"))
+``` 
+
+```{r}
+BiGram1 <- ExDT1 %>% unnest_tokens(input = FText1, output = bigram, 
+                                        token = 'ngrams', n = 2) %>% 
+  filter(! is.na(bigram))
+BiGram1 %>% select(bigram) %>% head(100)
+```
+
+
+# OBSERVATION(10): Table: TOP 50 Twitter "Excess Deaths" Associated Words used in Tweets
+# OBSERVATION(11): All World Continents clearly represented except Antarctica
+```{r}
+FTWord1 <- (text_df1$text_clean1)
+FTWord1 <- VectorSource(FTWord1)
+FTWord1 <- Corpus(FTWord1)
+FTWordT1 <- TermDocumentMatrix(FTWord1)
+FTWordM1 <- as.matrix(FTWordT1)
+FTWordV1 <- sort(rowSums(FTWordM1),decreasing=TRUE)
+FTWordD1 <- data.frame(word = names(FTWordV1),freq = FTWordV1)
+head(FTWordD1, 100)
+```
+# OBSERVATION(12): Tweet author locations for subject: "Excess Deaths"
+```{r}
+barplot(FTWordV1 [1:15], main = "Tweets: Excess Deaths - Top 15 Contributor LOCATIONS.",
+        col = "purple", horiz = TRUE, las = 1)
+```
+# OBSERVATION(12a): Locations of Tweet Contributors shows global spread on "Excess Deaths" cause opinion
+```{r}
+wordcloud(words = FTWordD1$word, freq = FTWordD1$freq, min.freq = 1,
+          max.words=75,random.order=FALSE, minLength = 5, rot.per=0.35,
+          colors=brewer.pal(8, "Dark2"))
+``` 
+
+################# CORRELATION LINEAR REGRESSION/ANOVA MODELING #################
+
+# OBSERVATION(13): RETWEET Count concentration <500 Counts
+```{r}
+boxplot(ExDT1$RTSCount, main = "RETWEET Count for downloaded Tweet Data", 
+     xlab = "Box Plot - Count Concentration = <500")
+```
+# OBSERVATION(14): FAVORITE Count concentration <1,000
+```{r}
+boxplot(ExDT1$FAVCount, main = "FAVORITE Count for Downloaded Tweet Data", 
+     xlab = "Box Plot - Count Concentration = <1000")
+```
+# OBSERVATION(15): FOLLOWER Count concentration <100,000
+```{r}
+boxplot(ExDT1$FollowC, main = "FOLLOWER Count for Downloaded Tweet Data", 
+     xlab = "Box Plot - Count Concentration = <100,000")
+```
+# OBSERVATION(16): FRIEND Count concentraion <10,000
+```{r}
+boxplot(ExDT1$FriendC, main = "FRIEND Count for Downloaded Tweet Data", 
+     xlab = "Box Plot - Count Concentration = <10,000")
+```
+# OBSERVATION(17): LIST Count concentration <2000 Counts
+```{r}
+boxplot(ExDT1$ListC, main = "LIST Count for Downloaded Tweet Data", 
+     xlab = "Box Plot - Count concentration = <2,000")
+```
+# OBSERVATION(18): STATUS Count concentration <200,000 Counts
+```{r}
+boxplot(ExDT1$StatusC, main = "STATUS Count for Downloaded Tweet Data", 
+     xlab = "Box Plot - Count concentration = <200,000")
+```
+# OBSERVATION(19): Linear Model shows correlation comparisons of Retweets and (Favorites, Followers and Friends)
+# OBSERVATION(20): Linear Model shows SRONG Correlation betwee Retweets and (Favorites and Followers Count).
+```{r}
+LinearModel <- lm(RTSCount ~ FAVCount + FollowC + FriendC + StatusC, data=ExDT1)
+summary(LinearModel)
+```
+
+# OBSERVATION(21): Linear Model shows correlation comparisons of Retweets and (Favorites, Followers and Friends)
+# OBSERVATION(22): Linear Model shows STRONG Correlation between Retweets and (Favorites and Followers Count).
+```{r}
+LinearModel1 <- lm(RTSCount ~ FAVCount + FollowC, data=ExDT1)
+summary(LinearModel1)
+```
+
+# OBSERVATION(23): Linear Model Graphs show STRONG Correlation between Retweets and (Favorites and Followers Count). 
+```{r}
+par(mfrow=c(2,2))
+plot(LinearModel1)
+par(mfrow=c(1,1))
+```
+
+# OBSERVATION(24): Anova Test shows STRONG Correlation between  Retweets and FAVORITES Count.
+```{r}
+AnovaTest <- aov(RTSCount ~ FAVCount, data = ExDT1)
+summary(AnovaTest)
+```
+# OBSERVATION(25): Anova Test Plots shows STRONG Correlation between  Retweets and FAVORITES Count.
+```{r}
+par(mfrow=c(2,2))
+plot(AnovaTest)
+par(mfrow=c(1,1))
+```
+# OBSERVATION(26): Anova Test shows STRONG Correlation between  Retweets and FOLLOWERS Count.
+```{r}
+AnovaTest1 <- aov(RTSCount ~ FollowC, data = ExDT1)
+summary(AnovaTest1)
+```
+# OBSERVATION(27): Anova Test Plots shows STRONG Correlation between  Retweets and FOLLOWERS Count.
+```{r}
+par(mfrow=c(2,2))
+plot(AnovaTest1)
+par(mfrow=c(1,1))
+```
+
+################################################################################
+########################### SUMMARY / CONCLUSIONS ##############################
+
+# OBSERVATION(1): Date Data is Concentrated between 12th to 15th of NOV22 TimeFrame
+# OBSERVATION(2): Scatter plot shows Tweet size concentration <400 characters
+# OBSERVATION(3): Bar Plot - Shows WEB Applications Exceed IPhone or Android Usage. 
+# OBSERVATION(4): IPhone leads Android usage, but phone usage exceeds WEB Applications.
+# OBSERVATION(5): Table: TOP 50 Twitter "Excess Deaths" Associated Words used in Tweets
+# OBSERVATION(6): Tweets - TOP 50 Show strong opinion correlation to COVID Vaccine Usage
+# OBSERVATION(7): BarPlot - TOP 15 Twitter "Excess Deaths" Word Counts
+# OBSERVATION(8): Tweets - TOP 15 Show strong opinion correlation to COVID Vaccine Usage
+# OBSERVATION(9): Tweets "Excess Deaths" Word/Text Cloud shows strong opinion correlation to COVID Vaccines
+# OBSERVATION(10): Table: TOP 50 Twitter "Excess Deaths" Associated Words used in Tweets
+# OBSERVATION(11): All World Continents clearly represented except Antarctica
+# OBSERVATION(12): Locations of Tweet Contributors shows global spread on "Excess Deaths" cause opinion
+# OBSERVATION(13): RETWEET Count concentration <500 Counts
+# OBSERVATION(14): FAVORITE Count concentration <1,000
+# OBSERVATION(15): FOLLOWER Count concentration <100,000
+# OBSERVATION(16): FRIEND Count concentraion <10,000
+# OBSERVATION(17): LIST Count concentration <2000 Counts
+# OBSERVATION(18): STATUS Count concentration <200,000 Counts
+# OBSERVATION(19): Linear Model shows correlation comparisons of Retweets and (Favorites, Followers and Friends)
+# OBSERVATION(20): Linear Model shows SRONG Correlation betwee Retweets and (Favorites and Followers Count).
+# OBSERVATION(21): Linear Model shows correlation comparisons of Retweets and (Favorites, Followers and Friends)
+# OBSERVATION(22): Linear Model shows SRONG Correlation betwee Retweets and (Favorites and Followers Count).
+# OBSERVATION(23): Linear Model Graphs show STRONG Correlation between Retweets and (Favorites and Followers Count).
+# OBSERVATION(24): Anova Test shows STRONG Correlation between  Retweets and FAVORITES Count.
+# OBSERVATION(25): Anova Test Plots shows STRONG Correlation between  Retweets and FAVORITES Count.
+# OBSERVATION(26): Anova Test shows STRONG Correlation between  Retweets and FOLLOWERS Count.
+# OBSERVATION(27): Anova Test Plots shows STRONG Correlation between  Retweets and FOLLOWERS Count.
+
+# BACKGROUND: Statistical Data shows an increase of Heart Disease and Stroke
+# mortality after the decline of the COVID Pandemic. This analysis probed Tweet
+# data from November 2022 to sample public opinion on probable cause of the 
+# increase in "Excess Deaths" mortality rates. 
+
+# CONCLUSIONS: The above data analysis shows a definitive public opinion that the
+# COVID Vaccine is the likely culprit for the increased mortality rates. The 
+# preponderance of users sent these tweets from their iPhone or Android smart phones
+# versus WEB Applications. The 5000 sample tweets show public opinion that this
+# problem is global and covers all World Continents except for Antarctica. Retweets can 
+# aid the spread of public opinion, and the data shows a strong correlation
+# with Retweets between Favorites and Followers.
+
+#//END
+
+
+
+

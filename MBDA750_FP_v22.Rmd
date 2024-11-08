@@ -1,0 +1,947 @@
+---
+title: "Final Project (MBDA750)    "
+author: "**Authors (Team Bravo): ** Jehu Humphries"
+date: "2024"
+output:
+  html_notebook:
+    pandoc_args: ["--from", "markdown+autolink_bare_uris"]
+---
+# SHAPING
+
+## -----FrameWork
+
+```{r, message=FALSE, warning=FALSE}
+# Importing all necessary R libraries
+library(caret)       # Classification and Regression Training
+library(conflicted)  # Provides an alternative approach to reolving conflicts caused by ambiguous function names
+library(corrplot)    # provides a visual exploratory tool on correlation matrix that supports automatic variable reordering 
+library(dplyr)       # Used for data manipulation
+library(e1071)       # Misc Functions of the DEPT of Statistics, Probability Theory Group
+library(GGally)      # Adds functions to ggplot2 that simplify combining geometric objects with transformed data. 
+library(ggcorrplot)  # Visualization of a correlation matrix using ggplot2
+library(glm2)        # Fitting Generalized Linear Models
+library(lubridate)   # Tools that make it easier to parse and manipulate dates
+library(pROC)        # An R package to display and analyze ROC curves
+library(reticulate)  # R Interface to Python
+library(ROCR)        # Visualizing the Performance of Scoring Classifiers
+library(rquery)      # Relational Query Generator for Data Manipulation at Scale
+library(tidyverse)   # Contains dplyr, forcats, ggplot2, readr, tibble, tidyr
+library(visdat)      # Preliminary Visualisation of Data
+```
+
+```{python}
+# Python: Import the Packages above for Hybrid Analysis and Plots
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import plotly.express as px
+import seaborn as sns
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score
+import warnings 
+warnings.filterwarnings('ignore')
+```
+
+```{r}
+# Create 
+CovDths <- read.csv("CovidDeaths.csv")
+CovDths$date <- as.Date(CovDths$date, format="%m/%d/%Y")
+View(CovDths)
+```
+
+```{r}
+# Create 
+CovVac <- read.csv("CovidVaccinations.csv")
+CovVac$date <- as.Date(CovVac$date, format="%m/%d/%Y")
+View(CovVac)
+```
+
+## -----Exploration
+
+### -----CovidDeaths
+
+```{r}
+dim(CovDths)
+```
+
+```{r}
+sum(is.na(CovDths))
+```
+
+```{r}
+# Show Variable titles and data types. 
+str(CovDths)
+```
+
+```{r}
+# Show dataframe 'CovDths' variable characteristics. 
+summary(CovDths)
+```
+
+```{r}
+vis_dat(CovDths, warn_large_data = FALSE)
+```
+
+### -----CovidVaccinations
+
+```{r}
+dim(CovVac)
+```
+
+```{r}
+sum(is.na(CovVac))
+```
+
+```{r}
+# Show Variable titles and data types. 
+str(CovVac)
+```
+
+```{r}
+# Show variable characteristics. 
+summary(CovVac)
+```
+
+```{r}
+vis_dat(CovVac, warn_large_data = FALSE)
+```
+
+## -----Shaping (PCovDth)
+
+```{python}
+# Python: Created Pandas PAAd1 dataframe from PAdultC.csv for Association Analysis
+PCovDth = pd.read_csv('CovidDeaths.csv')
+```
+
+```{python}
+# Python: Gathered data on titles and column positions to prepare for dataframe shaping
+column_positions = [PCovDth.columns.get_loc(col) for col in PCovDth.columns]
+column_titles = PCovDth.columns.tolist()
+
+for position, title in zip(column_positions, column_titles):
+    print(f"Column Position: {position}, Title: {title}")
+```
+
+```{python}
+PCovDth1 = PCovDth.iloc[:, [0, 1, 2, 3, 4, 5, 6, 8, 9, 11, 12, 14, 15, 17]]
+PCovDth1.to_csv('PCovDth1.csv', index=False)
+```
+
+```{r}
+CovDth1 <- read.csv("PCovDth1.csv")
+vis_dat(CovDth1, warn_large_data = FALSE)
+```
+
+## -----Shaping (PCovVac)
+
+```{python}
+# Python: Created Pandas PAAd1 dataframe from PAdultC.csv for Association Analysis
+PCovVac = pd.read_csv('CovidVaccinations.csv')
+```
+
+```{python}
+# Python: Gathered data on titles and column positions to prepare for dataframe shaping
+column_positions = [PCovVac.columns.get_loc(col) for col in PCovVac.columns]
+column_titles = PCovVac.columns.tolist()
+
+for position, title in zip(column_positions, column_titles):
+    print(f"Column Position: {position}, Title: {title}")
+```
+
+```{python}
+PCovVac1 = PCovVac.iloc[:, [4, 5, 6, 7, 10, 11, 13, 14, 15, 17, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40]]
+PCovVac1.to_csv('PCovVac1.csv', index=False)
+```
+
+```{r}
+CovVac1 <- read.csv("PCovVac1.csv")
+vis_dat(CovVac1, warn_large_data = FALSE)
+```
+
+## -----Combining (CovDthVac)
+
+```{r}
+# Combine
+CovDthVac <- cbind(CovDth1, CovVac1)
+write.csv(CovDthVac, "CovDthVac.csv", row.names = FALSE)
+colnames(CovDthVac)
+```
+
+```{r}
+dim(CovDthVac)
+```
+
+
+```{r}
+sum(is.na(CovDthVac))
+```
+
+```{r}
+CovDthVac[is.na(CovDthVac)] <- 0                                                # Replace 'N/A' values in dataset with '0'
+```
+
+```{r}
+sum(is.na(CovDthVac))
+```
+
+```{r}
+png("CorPlot5.png", width = 1200, height = 800)
+vis_dat(CovDthVac, warn_large_data = FALSE)
+dev.off()
+```
+
+```{r}
+summary(CovDthVac)
+```
+
+## -----Linear Relationships (Correlation Matrix)
+
+### -----Rquery.cormat()
+
+```{r}
+NumCols <- CovDthVac %>% select_if(is.numeric)                                  # Select only the numeric columns
+CovDthVacNum <- data.frame(NumCols)                                             # Create a new dataframe with only the numeric columns
+summary(CovDthVacNum)                                                               # Show DataFrame data types
+```
+
+```{r}
+CorMtrx <- cor(CovDthVacNum)                                                    # Compute the correlation matrix
+png("CorPlot1.png", width = 1200, height = 800)
+corrplot::corrplot(CorMtrx, method = "circle", type = "full", tl.col = "black") # Plot the correlation matrix
+title("Rquery.Cormat Correlation Matrix of CovDthVacNum Data Frame")
+dev.off()
+```
+
+```{r}
+corrplot::corrplot(CorMtrx, method = "circle", type = "full", tl.col = "black") # Plot the correlation matrix
+title("Rquery.Cormat Correlation Matrix of CovDthVacNum Data Frame")
+```
+
+```{r}
+CorMtrx <- cor(CovDthVacNum)                                                    # Compute the correlation matrix
+png("CorPlot2.png", width = 1200, height = 800)
+ggcorrplot::ggcorrplot(CorMtrx, method = "circle", type = "full", tl.col = "black") + # Plot the correlation matrix
+  ggplot2::labs(title = "Rquery.Cormat Matrix of CovDthVacNum Data Frame")
+dev.off()
+```
+
+```{r}
+ggcorrplot::ggcorrplot(CorMtrx, method = "circle", type = "full", tl.col = "black") + # Plot the correlation matrix
+  ggplot2::labs(title = "Rquery.Cormat Matrix of CovDthVacNum Data Frame")
+```
+
+### -----Spearman Cor()
+
+```{r}
+CorMtrx2 <- cor(CovDthVacNum, method = "spearman")                              # Compute the Spearman correlation matrix
+corrplot::corrplot(CorMtrx2, method = "circle", type = "full", tl.col = "black") # Plot the correlation matrix
+title("Spearman Correlation Matrix of CovDthVacNum Data Frame")
+```
+
+
+```{r}
+png("CorPlot3.png", width = 1200, height = 800)
+corrplot::corrplot(CorMtrx2, method = "circle", type = "full", tl.col = "black")  # Plot the correlation matrix
+title("Spearman Correlation Matrix of CovDthVacNum Data Frame")
+dev.off()
+```
+
+```{r}
+ggcorrplot::ggcorrplot(CorMtrx2, method = "circle", type = "full", tl.col = "black") + # Plot the correlation matrix
+   ggplot2::labs(title = "Spearman Correlation Matrix of CovDthVacNum Data Frame")
+```
+
+```{r}
+png("CorPlot4.png", width = 1200, height = 800)
+ggcorrplot::ggcorrplot(CorMtrx2, method = "circle", type = "full", tl.col = "black") + # Plot the correlation matrix
+  ggplot2::labs(title = "Spearman Correlation Matrix of CovDthVacNum Data Frame")
+dev.off()
+```
+
+## -----Data HoldOut
+
+```{r}
+# Create DataFrame of 10% sample from CovDthVac called RdMt10. The remaining 90% is a DataFrame called RdMt90. Show Dimensions of each.
+RdMt10 <- CovDthVac %>% sample_frac(0.1)
+RdMt90 <- CovDthVac %>% anti_join(RdMt10)
+dim(RdMt10)
+dim(RdMt90)
+```
+
+## -----Data Partioning
+
+```{r}
+set.seed(123)                          # Set seed for reproducibility
+RowIndic <- 1:nrow(RdMt90)             # Create a vector of row indices for RdMt90
+TrainIndic <- createDataPartition(RowIndic, p = 0.7, list = FALSE)
+RdMtTrain <- RdMt90[TrainIndic, ]      # Use createDataPartition() to split the indices into training and validation sets
+RdMtValid <- RdMt90[-TrainIndic, ]
+dim(RdMtTrain)
+dim(RdMtValid)
+```
+
+## -----GLM2 Modeling 
+
+```{r}
+str(RdMtTrain)
+```
+
+
+```{r}
+summary(RdMtTrain)
+```
+
+# -----Multivariate LogReg
+
+
+```{r, warning=FALSE}
+LogReg <- glm2(positive_rate ~ population + new_cases + new_deaths + people_fully_vaccinated + population_density +
+                 median_age + gdp_per_capita + extreme_poverty + cardiovasc_death_rate + diabetes_prevalence + 
+                 handwashing_facilities + hospital_beds_per_thousand + life_expectancy, family = binomial(link = "logit"), data = RdMtTrain)
+summary(LogReg)
+```
+
+```{r}
+# LR <- predict(LogReg, newdata=RdMtValid, type='response')
+# p.readmitted <- round(LR)
+# p.readmitted
+
+# confusionMatrix(as.factor(p.readmitted), as.factor(RdMtValid$positive_rate))
+```
+
+```{r}
+# Use model to predict probability of default
+# predicted <- predict(model, test, type = "response")
+
+# Fit logistic regression model
+# model <- glm(positive_rate ~ ., family = "binomial", data = train)
+
+# Use model to predict probability of default
+# predicted <- predict(LogReg, RdMtValid, type = "response")
+
+# Convert defaults from "Yes" and "No" to 1's and 0's
+# test$positive_rate <- ifelse(test$positive_rate == "Yes", 1, 0)
+
+# Create confusion matrix
+# confusionMatrix(as.factor(RdMtValid$positive_rate), as.factor(predicted))
+```
+
+# -----LogReg2
+
+```{r}
+# Combine
+CovDthVac2 <- cbind(CovDth1, CovVac1)
+write.csv(CovDthVac, "CovDthVac2.csv", row.names = FALSE)
+colnames(CovDthVac2)
+```
+
+```{r}
+dim(CovDthVac2)
+```
+
+```{r}
+# Remove 'N/A' rows in 'positive_rate' variable for Multivariate (Full-Fitted) Linear Regression
+CovDthVac3 <- CovDthVac2 %>% dplyr::filter(!is.na(positive_rate))
+```
+
+```{r}
+CovDthVac4 <- CovDthVac3 %>% mutate(positive_rate = ifelse(positive_rate > 0, 1, positive_rate))
+```
+
+```{r}
+# Create new column PosBin
+CovDthVac3 <- CovDthVac3 %>% mutate(PosBin = ceiling(positive_rate))
+write.csv(CovDthVac3, "CovDthVac3.csv", row.names = FALSE)
+```
+
+```{r}
+summary(CovDthVac3$PosBin)
+```
+
+```{r}
+sum(CovDthVac3$PosBin == 0)
+```
+
+```{r}
+dim(CovDthVac3)
+```
+
+```{r}
+# Create new variable PosBin2
+CovDthVac3 <- CovDthVac3 %>% mutate(PosBin2 = ifelse(positive_rate > 0.1, 1, 0))
+```
+
+```{r}
+sum(CovDthVac3$PosBin2 == 0)
+```
+
+```{r, warning=FALSE}
+LogReg1 <- glm2(positive_rate ~ population + new_cases + new_deaths + people_fully_vaccinated + population_density +
+                 median_age + gdp_per_capita + extreme_poverty + cardiovasc_death_rate + diabetes_prevalence + 
+                 handwashing_facilities + hospital_beds_per_thousand + life_expectancy, family = binomial(link = "logit"), data = CovDthVac3)
+summary(LogReg1)
+```
+
+# YEP--LR for PosBin2
+
+## --HoldOut2
+
+```{r}
+# Create DataFrame of 10% sample from CovDthVac called RdMt10. The remaining 90% is a DataFrame called RdMt90. Show Dimensions of each.
+CovHold10 <- CovDthVac3 %>% sample_frac(0.1)
+CovHold90 <- CovDthVac3 %>% anti_join(RdMt10)
+dim(CovHold10)
+dim(CovHold90)
+```
+
+## --Patitioning2
+
+```{r}
+set.seed(123)                          # Set seed for reproducibility
+RowIndic <- 1:nrow(CovHold90)             # Create a vector of row indices for RdMt90
+TrainIndic <- createDataPartition(RowIndic, p = 0.7, list = FALSE)
+CovHoldTrain <- CovHold90[TrainIndic, ]      # Use createDataPartition() to split the indices into training and validation sets
+CovHoldValid <- CovHold90[-TrainIndic, ]
+dim(CovHoldTrain)
+dim(CovHoldValid)
+```
+## ---LogRegTrain
+```{r, warning=FALSE}
+LogReg2 <- glm2(PosBin2 ~ population + new_cases + new_deaths + people_fully_vaccinated + population_density +
+                 median_age + gdp_per_capita + extreme_poverty + cardiovasc_death_rate + diabetes_prevalence + 
+                 handwashing_facilities + hospital_beds_per_thousand + life_expectancy, family = binomial(link = "logit"), data = CovHoldTrain)
+summary(LogReg2)
+```
+
+```{r}
+LR <- predict(LogReg2, newdata=CovHoldTrain, type='response')
+p.readmitted <- round(LR)
+p.readmitted
+
+confusionMatrix(as.factor(p.readmitted), as.factor(CovHoldTrain$PosBin2))
+```
+
+```{r}
+auc(CovHoldTrain$PosBin2, LR)
+```
+
+```{r}
+roc <- roc(CovHoldTrain$PosBin2, LR)
+plot(roc, main = "ROC Curve", print.auc = TRUE, auc.polygon = TRUE, max.auc.polygon = TRUE, grid = TRUE, legacy.axes = TRUE)
+```
+
+
+
+## ---LogRegValidate
+
+```{r, warning=FALSE}
+LogReg3 <- glm2(PosBin2 ~ population + new_cases + new_deaths + people_fully_vaccinated + population_density +
+                 median_age + gdp_per_capita + extreme_poverty + cardiovasc_death_rate + diabetes_prevalence + 
+                 handwashing_facilities + hospital_beds_per_thousand + life_expectancy, family = binomial(link = "logit"), data = CovHoldValid)
+summary(LogReg3)
+```
+
+```{r}
+LR1 <- predict(LogReg3, newdata=CovHoldValid, type='response')
+p.readmitted <- round(LR1)
+p.readmitted
+
+confusionMatrix(as.factor(p.readmitted), as.factor(CovHoldValid$PosBin2))
+```
+
+```{r}
+auc(CovHoldValid$PosBin2, LR1)
+```
+
+```{r}
+roc <- roc(CovHoldValid$PosBin2, LR1)
+plot(roc, main = "ROC Curve", print.auc = TRUE, auc.polygon = TRUE, max.auc.polygon = TRUE, grid = TRUE, legacy.axes = TRUE)
+```
+
+## ---LogRegScore
+
+```{r, warning=FALSE}
+LogReg4 <- glm2(PosBin2 ~ population + new_cases + new_deaths + people_fully_vaccinated + population_density +
+                 median_age + gdp_per_capita + extreme_poverty + cardiovasc_death_rate + diabetes_prevalence + 
+                 handwashing_facilities + hospital_beds_per_thousand + life_expectancy, family = binomial(link = "logit"), data = CovHold10)
+summary(LogReg4)
+```
+
+```{r}
+LR2 <- predict(LogReg4, newdata=CovHold10, type='response')
+p.readmitted <- round(LR2)
+p.readmitted
+
+confusionMatrix(as.factor(p.readmitted), as.factor(CovHold10$PosBin2))
+```
+
+```{r}
+auc(CovHold10$PosBin2, LR2)
+```
+
+```{r}
+roc <- roc(CovHold10$PosBin2, LR2)
+plot(roc, main = "ROC Curve", print.auc = TRUE, auc.polygon = TRUE, max.auc.polygon = TRUE, grid = TRUE, legacy.axes = TRUE)
+```
+
+# WK4 - AVS/PCA
+
+### ---Section AVS
+
+```{r, warning=FALSE, message=FALSE}
+library(ade4)                 #         Tools for Multivariate Analysis
+library(cluster)              # **NEW** "Finding Groups in Data": Cluster Analysis Extended Rousseeuw et al.
+library(factoextra)           # **NEW** Print method for an object of class factoextra
+library(FactoMineR)           # **NEW** Multivariate Exploratory Data Analysis and Data Mining with R
+library(MASS)                 #         Support Functions and Datasets for Venables and Ripley's MASS 
+library(NbClust)              # **NEW** Determining the Best Number of Clusters in a Data Set
+library(PerformanceAnalytics) #         Econometric Tools for Performance and Risk Analysis
+library(stats)                #         Functions for statistical calculations and random number generation
+```
+
+```{r}
+# Create Data
+CovHoldTrain0 <- CovHoldTrain
+CovHoldTrain0[is.na(CovHoldTrain0)] <- 0
+```
+
+```{r}
+dim(CovHoldTrain)
+```
+
+```{r}
+sum(is.na(CovHoldTrain0))
+```
+
+```{r}
+summary(CovHoldTrain0)
+```
+
+
+```{r, warning=FALSE}
+LogReg5 <- glm2(PosBin2 ~ population + new_cases + new_deaths + people_fully_vaccinated + population_density +
+                 median_age + gdp_per_capita + extreme_poverty + cardiovasc_death_rate + diabetes_prevalence + 
+                 handwashing_facilities + hospital_beds_per_thousand + 
+                 life_expectancy, family = binomial(link = "logit"), data = CovHoldTrain0)
+summary(LogReg5)
+```
+
+```{r, warning=FALSE}
+# Perform AVS using stepAIC
+fit2 <- stepAIC(LogReg5, direction = "both")
+summary(fit2)
+```
+
+```{r}
+show(fit2)
+```
+
+```{r}
+# Get the selected coefficients
+selected_coeffs <- coef(fit2)
+show(selected_coeffs)
+```
+
+```{r}
+summary(selected_coeffs)
+```
+
+
+```{r}
+# Now, if you want to predict using the selected variables, you can do the following:
+# Assuming you have a new data frame 'newdata' with the same predictor variables
+predicted_y <- predict(fit2, newdata = CovHoldTrain0)
+
+# If you're interested in the names of the selected variables:
+selected_variable_names <- attr(terms(fit2), 'term.labels')
+show(selected_variable_names)
+# AI-generated code. Review and use carefully. More info on FAQ.
+# Remember to replace fit1 with your actual fitted model and adjust the variable names accordingly. The stepAIC() function will automatically select the best subset of variables based on AIC, and you can use the resulting model for predictions or further analysis123.
+```
+
+### ---Section PCA
+
+```{r}
+# DataFrame (Numerical Variables Only) CovDthVacNum summary (N/A Variables replaced with '0')
+summary(CovDthVacNum) 
+```
+
+```{r}
+# Create new dataframe only highest correlations from Multivariate (Full-Fit) Linear Regression (WK3)
+CovDthVac5 <- CovDthVac3[, c("PosBin2" ,"population", "new_cases", "new_deaths", "median_age", "gdp_per_capita", "life_expectancy")]
+```
+
+```{r}
+# Replace N/A values in DataFrame CovDthVac5 with '0'
+CovDthVac5[is.na(CovDthVac5)] <- 0
+```
+
+```{r}
+CorMtrx1 <- cor(CovDthVac5)                                                    # Compute the correlation matrix
+png("CorPlot1.png", width = 1200, height = 800)
+corrplot::corrplot(CorMtrx1, method = "circle", type = "full", tl.col = "black") # Plot the correlation matrix
+title("Rquery.Cormat Correlation Matrix of CovDthVacNum Data Frame")
+dev.off()
+```
+
+```{r} 
+corrplot::corrplot(CorMtrx1, method = "circle", type = "full", tl.col = "black") # Plot the correlation matrix
+title("Spearman Correlation Matrix of CovDthVacNum Data Frame")
+```
+
+```{r}
+# Show new approved Variable names and their column Indecies
+VarName0 <- colnames(CovDthVacNum)
+
+for (i in seq_along(VarName0)) {
+  cat("Var Index", i, ":", VarName0[i], "\n")
+}
+
+```
+
+```{r}
+# Perform PCA using the princomp(). 'Cor' set to FALSE due to 
+PCA1 <- princomp(CovDthVacNum, cor=FALSE)
+print(PCA1)
+```
+
+```{r, warning=FALSE}
+# Producing a biplot from the princomp() results
+biplot(PCA1)
+```
+
+```{r}
+# Perform PCA using the prcomp()
+PCA2 <- prcomp(CovDthVacNum, scale=TRUE)
+PCA2$rotation <- -1*PCA2$rotation
+PCA2$rotation
+```
+
+```{r}
+# Perform PCA using the prcomp()
+PCA2 <- prcomp(CovDthVacNum, scale=TRUE)
+PCA2
+```
+
+```{r, warning=FALSE}
+# Perform PCA using the dudi.pca()
+PCA3 <- dudi.pca(CovDthVacNum)
+PCA3
+```
+
+### -----FactoMineR
+
+```{r}
+# Strip PC1 variables below 0
+ColDel <- c("total_cases_per_million", "new_cases_per_million", "total_deaths_per_million", "new_deaths_per_million",
+            "reproduction_rate", "total_tests", "new_tests", "total_tests_per_thousand", "new_tests_per_thousand",
+            "positive_rate", "tests_per_case", "stringency_index", "population_density", "median_age", "aged_65_older",
+            "aged_70_older", "gdp_per_capita", "cardiovasc_death_rate")
+CVDNStrip <- CovDthVacNum[, !(names(CovDthVacNum) %in% ColDel)]  # Create CVDNStrip by excluding the specified columns
+dim(CVDNStrip)
+```
+
+```{r}
+# Show new approved Variable names and their column Indecies
+VarName <- colnames(CVDNStrip)
+for (i in seq_along(VarName)) {
+  cat("Var Index", i, ":", VarName[i], "\n")
+}
+```
+
+
+```{r}
+# Perform PCA using FactoMineR package and function PCA()
+PCA4 <- PCA(CVDNStrip)
+summary(PCA4)
+```
+
+```{r}
+print(PCA4)
+```
+
+```{r}
+EigVal <- PCA4$eig
+head(EigVal[, 1:2])
+```
+
+
+
+```{r}
+VarVar <- PCA4$var$cos2
+show(VarVar)
+```
+
+
+```{r}
+barplot(EigVal[, 2], names.arg=1:nrow(EigVal), 
+       main = "Variances",
+       xlab = "Principal Components",
+       ylab = "Percentage of variances",
+       col ="steelblue")
+# Add connected line segments to the plot
+lines(x = 1:nrow(EigVal), EigVal[, 2], 
+      type="b", pch=19, col = "red")
+```
+
+```{r}
+fviz_screeplot(PCA4, ncp=10)
+```
+
+
+
+```{r}
+head(PCA4$var$coord)
+```
+
+```{r}
+PCA4$var$contrib
+```
+
+```{r, warning=FALSE}
+plot(PCA4, choix = "var")
+```
+
+```{r}
+png("CorPlot1.png", width = 1200, height = 800)
+fviz_pca_var(PCA4, col.var="contrib") +
+  theme_minimal()
+dev.off()
+```
+
+```{r}
+fviz_pca_var(PCA4, col.var="contrib")+
+  theme_minimal()
+```
+
+```{r}
+fviz_pca_var(PCA4, col.var="cos2")+
+  theme_minimal()
+```
+
+# WK5 KMeans Clustering
+
+```{r, warning=FALSE}
+# Strip PC1 variables below 0
+ColDel1 <- c("total_cases_per_million", "new_cases_per_million", "total_deaths_per_million", "new_deaths_per_million",
+            "reproduction_rate", "total_tests", "new_tests", "total_tests_per_thousand", "new_tests_per_thousand",
+            "positive_rate", "tests_per_case", "stringency_index", "population_density", "median_age", "aged_65_older",
+            "aged_70_older", "gdp_per_capita")
+CDVNStrip1 <- CovDthVacNum[, !(names(CovDthVacNum) %in% ColDel1)]  # Create CVDNStrip by excluding the specified columns
+write.csv(CDVNStrip1, "CDVNStrip1.csv", row.names = FALSE)
+dim(CDVNStrip1)
+```
+
+```{r}
+# Show new approved Variable names and their column Indecies
+VarName1 <- colnames(CDVNStrip1)
+for (i in seq_along(VarName1)) {
+  cat("Var Index", i, ":", VarName1[i], "\n")
+}
+```
+
+```{r}
+summary(CDVNStrip1)
+```
+
+```{r}
+# create a plot of the number of clusters vs. the total within sum of squares on dataframe CVDNSTRIP1
+# fviz_nbclust(CDVNStrip1, kmeans, method = "wss")
+```
+
+```{r}
+# Check if all columns are numeric
+all_numeric <- all(sapply(CDVNStrip1, is.numeric))
+
+if (all_numeric) {
+  print("All columns in CDVNStrip1 are numeric.")
+} else {
+  print("Not all columns in CDVNStrip1 are numeric.")
+}
+```
+
+```{r}
+# Example: K-means clustering
+k.max <- 10  # Maximum number of clusters to consider
+wss <- sapply(2:k.max, function(k) {
+  kmeans_result <- kmeans(CDVNStrip1, centers = k, nstart = 10)
+  kmeans_result$tot.withinss
+})
+```
+
+```{r}
+# Visualize the optimal number of clusters
+#fviz_nbclust(wss, method = "wss", k.max = k.max,
+#             barfill = "steelblue", barcolor = "steelblue",
+#             linecolor = "steelblue", print.summary = TRUE)
+```
+
+```{r}
+# Compute the dissimilarity matrix (distance matrix) and determine optimal number of clusters 
+DissM <- dist(CDVNStrip1)
+nb <- NbClust(DissM, distance = "euclidean", min.nc = 2, max.nc = 10, method = "kmeans")
+OptClust <- nb$Best.nc[1]
+CDVNBclust <- kmeans(CDVNStrip1, centers = OptClust)
+
+```
+
+
+
+```{r}
+# K-Mean on CDVNStrip1 (4 Clusters / 5 nstrarts)
+set.seed(1)
+KM1 <- kmeans(CDVNStrip1, centers = 4, nstart = 5)
+KM1
+```
+
+```{r}
+#plot results of final k-means model
+fviz_cluster(KM1, data = CDVNStrip1)
+```
+
+```{r}
+# Assuming CDVNStrip1 is your existing dataframe
+# Select the desired columns
+CDVNStrip2 <- CDVNStrip1 %>%
+  dplyr::select(extreme_poverty, cardiovasc_death_rate, diabetes_prevalence,
+         female_smokers, male_smokers, handwashing_facilities,
+         hospital_beds_per_thousand, life_expectancy, human_development_index)
+```
+
+```{r}
+#make this example reproducible
+set.seed(1)
+
+#perform k-means clustering with k = 4 clusters
+km <- kmeans(CDVNStrip2, centers = 3, nstart = 5)
+
+#view results
+km
+```
+
+```{r}
+#plot results of final k-means model
+fviz_cluster(km, data = CDVNStrip2)
+```
+
+```{r}
+# Copy the 'continent' column from CovDthVac to CDVNStrip1
+CDVNStrip3 <- CDVNStrip1
+CDVNStrip3$iso_code <- CovDthVac$iso_code
+```
+
+```{r}
+CDVNStrip3$iso_code <- as.numeric(as.factor(CDVNStrip3$iso_code))
+```
+
+
+```{r}
+#make this example reproducible
+set.seed(1)
+
+#perform k-means clustering with k = 4 clusters
+km <- kmeans(CDVNStrip3, centers = 10, nstart = 25)
+
+#view results
+km
+```
+
+```{r}
+#plot results of final k-means model
+fviz_cluster(km, data = CDVNStrip3)
+```
+# --- YEARS
+
+```{r}
+CDVYears <- CovDthVac
+CDVYears$Year <- substr(CDVYears$date, start = nchar(CDVYears$date) - 3, stop = nchar(CDVYears$date))
+CDVYears$Year <- as.numeric(CDVYears$Year)
+str(CDVYears)
+```
+
+```{r}
+CDVYears <- select_if(CDVYears, is.numeric)
+str(CDVYears)
+```
+
+```{r}
+CDVYears <- CDVYears %>%
+  dplyr::select(new_cases, new_deaths, new_vaccinations, cardiovasc_death_rate, 
+                diabetes_prevalence, female_smokers, male_smokers, life_expectancy, 
+                human_development_index, Year)
+write.csv(CDVYears, "CDVYears.csv", row.names = FALSE)
+str(CDVYears)
+```
+
+
+# --- 2020
+
+```{r}
+CDVYears <- read.csv("CDVYears.csv")
+```
+
+
+```{r}
+CDVY20 <- CDVYears
+CDVY20 <- CDVY20[CDVY20$Year == 2020, ]
+CDVY20 <- subset(CDVY20, select = -Year)
+str(CDVY20)
+```
+
+```{r}
+fviz_nbclust(CDVY20, kmeans, method = "wss")
+```
+
+```{r}
+#make this example reproducible
+set.seed(1)
+
+#perform k-means clustering with k = 4 clusters
+km <- kmeans(CDVY20, centers = 4, nstart = 10)
+
+#view results
+km
+```
+
+```{r}
+#plot results of final k-means model
+fviz_cluster(km, data = CDVY20)
+```
+
+```
+
+# --- 2021
+
+```{r}
+CDVY21 <- CDVYears
+CDVY21 <- CDVY21[CDVY21$Year == 2021, ]
+summary(CDVY21$Year)
+```
+
+# --- 2022
+
+```{r}
+CDVY22 <- CDVYears
+CDVY22 <- CDVY22[CDVY22$Year == 2022, ]
+summary(CDVY22$Year)
+```
+
+# --- 2023
+
+```{r}
+CDVY23 <- CDVYears
+CDVY23 <- CDVY23[CDVY23$Year == 2023, ]
+summary(CDVY23$Year)
+```
+
+# -----// END //----------------------------------------------------------------
+
+
+
+
+
+
+
+
+
